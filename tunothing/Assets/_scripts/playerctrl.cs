@@ -13,7 +13,7 @@ public class playerctrl : MonoBehaviour {
 
     bool startattract = false;
     int attract = 1;
-    int attract_max = 100;
+    int attract_max = 50;
 
     // Use this for initialization
     void Start () {
@@ -50,11 +50,12 @@ public class playerctrl : MonoBehaviour {
             if (getathing)
             {
 
-                var mouseDir = mouse_curser.position - getathing.position;
-                mouseDir.z = 0.0f;
-                mouseDir = mouseDir.normalized;
+                var playerDir = transform.position - getathing.position;
+                playerDir.z = 0.0f;
+                playerDir = playerDir.normalized;
 
-                getathing.GetComponent<Rigidbody2D>().AddForce(-mouseDir, ForceMode2D.Impulse);
+                getathing.GetComponent<Rigidbody2D>().AddForce(-playerDir * attract * 0.015f, ForceMode2D.Impulse);
+
             }
             startattract = false;
             getathing = null;

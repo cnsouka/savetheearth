@@ -364,3 +364,5 @@ war/build/x86/digdig_Data/Managed/UnityEngine.VehiclesModule.xml
 *.rar
 *.wav
 *.mp3
+tunothing/build/
+tunothing/Library/
