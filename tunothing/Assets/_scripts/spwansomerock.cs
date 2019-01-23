@@ -37,6 +37,14 @@ public class spwansomerock : MonoBehaviour {
                 rocklist.GetChild(Random.Range(0, rocklist.childCount)).position.z
             );
 
+            //fx
+            if (newrock.GetComponent<Animator>())
+            {
+
+                newrock.GetComponent<Animator>().SetFloat("speed",Random.Range(1, 1.5f));
+
+            }
+
         }
 
 

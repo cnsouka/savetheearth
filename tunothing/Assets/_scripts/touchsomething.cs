@@ -34,6 +34,10 @@ public class touchsomething : MonoBehaviour {
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+
+        if (transform.tag == "card" && collision.transform.tag=="fami")
+            return;
+
         spawnit(collision.transform.position);
         Destroy(transform.gameObject);
         if (collision.transform.tag == "rock")

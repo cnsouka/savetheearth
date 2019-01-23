@@ -366,3 +366,4 @@ war/build/x86/digdig_Data/Managed/UnityEngine.VehiclesModule.xml
 *.mp3
 tunothing/build/
 tunothing/Library/
+tunothing/Temp/UnityLockfile
