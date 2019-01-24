@@ -21,6 +21,11 @@ public class introctrl : MonoBehaviour {
         {
             gotomain();
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 
 }

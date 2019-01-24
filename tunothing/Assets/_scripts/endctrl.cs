@@ -22,5 +22,11 @@ public class endctrl : MonoBehaviour {
         {
             gotointro();
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            gotointro();
+        }
+
     }
 }

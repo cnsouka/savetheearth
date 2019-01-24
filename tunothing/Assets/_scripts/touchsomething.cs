@@ -30,6 +30,9 @@ public class touchsomething : MonoBehaviour {
 
         Camera.main.transform.GetComponent<cam_follow>().startshakecam();
 
+        //se
+        GameObject.Find("se").transform.GetChild(0).GetComponent<AudioSource>().Play();
+
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

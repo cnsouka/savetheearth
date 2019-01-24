@@ -25,6 +25,8 @@ public class famictrl : MonoBehaviour {
     public Transform shootthing;
     public float shootdelay = 1;
 
+    public bool stopmove = false;
+
     enum _famistate
     {
         idle,
@@ -57,17 +59,20 @@ public class famictrl : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if (famistate == _famistate.chaseing)
+        if (!stopmove)
         {
-            float step = movespeed * Time.deltaTime;
-            transform.position = Vector3.MoveTowards(transform.position, player.position, step);
+            if (famistate == _famistate.chaseing)
+            {
+                float step = movespeed * Time.deltaTime;
+                transform.position = Vector3.MoveTowards(transform.position, player.position, step);
+            }
+            if (famistate == _famistate.lookaround)
+            {
+                float step = movespeed * Time.deltaTime * 0.8f;
+                transform.position = Vector3.MoveTowards(transform.position, tagretpoint, step);
+            }
         }
-        if (famistate == _famistate.lookaround)
-        {
-            float step = movespeed * Time.deltaTime * 0.8f;
-            transform.position = Vector3.MoveTowards(transform.position, tagretpoint, step);
-        }
-		
+	
 	}
 
     IEnumerator _choosewhatiwanttodo()
@@ -163,6 +168,9 @@ public class famictrl : MonoBehaviour {
 
         Camera.main.transform.GetComponent<cam_follow>().startshakecam();
 
+        //se
+        GameObject.Find("se").transform.GetChild(0).GetComponent<AudioSource>().Play();
+
     }
 
     void getdamage()
@@ -190,6 +198,9 @@ public class famictrl : MonoBehaviour {
         }else if (myhealth <= 1)
         {
             destroyme();
+
+            //se
+            GameObject.Find("se").transform.GetChild(1).GetComponent<AudioSource>().Play();
         }
 
     }
@@ -207,12 +218,18 @@ public class famictrl : MonoBehaviour {
 
         player.GetComponent<playerctrl>().idestroyafamicom();
 
+        stopmove = true;
+
         Destroy(gameObject, 2);
 
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+
+        //remove force
+        transform.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
+        transform.GetComponent<Rigidbody2D>().angularVelocity = 0;
 
         if (collision.transform.tag == "Player")
         {
@@ -230,27 +247,35 @@ public class famictrl : MonoBehaviour {
     void shootthings()
     {
 
-        if (famistate == _famistate.chaseing)
+        if (!stopmove)
         {
 
-            GameObject shoot = Instantiate(shootthing.gameObject);
-            //newrock.transform.SetParent(transform);
+            if (famistate == _famistate.chaseing)
+            {
 
-            shoot.transform.position = transform.position + Random.insideUnitSphere * .3f;
-            shoot.transform.position = new Vector3(
-                shoot.transform.position.x,
-                shoot.transform.position.y,
-                shootthing.position.z
-            );
+                GameObject shoot = Instantiate(shootthing.gameObject);
+                //newrock.transform.SetParent(transform);
 
-            var playerDir = transform.position - player.position;
-            playerDir.z = 0.0f;
-            playerDir = playerDir.normalized;
+                shoot.transform.position = transform.position + Random.insideUnitSphere * .3f;
+                shoot.transform.position = new Vector3(
+                    shoot.transform.position.x,
+                    shoot.transform.position.y,
+                    shootthing.position.z
+                );
 
-            shoot.GetComponent<Rigidbody2D>().AddForce(-playerDir * 1.5f, ForceMode2D.Impulse);
-            //newrock.GetComponent<ani>().Play();
+                var playerDir = transform.position - player.position;
+                playerDir.z = 0.0f;
+                playerDir = playerDir.normalized;
 
-            Destroy(shoot.gameObject, 120);
+                shoot.GetComponent<Rigidbody2D>().AddForce(-playerDir * 1.5f, ForceMode2D.Impulse);
+                //newrock.GetComponent<ani>().Play();
+
+                Destroy(shoot.gameObject, 120);
+
+                //se
+                GameObject.Find("se").transform.GetChild(5).GetComponent<AudioSource>().Play();
+
+            }
 
         }
 

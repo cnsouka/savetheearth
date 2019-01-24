@@ -25,6 +25,8 @@ public class playerctrl : MonoBehaviour
 
     public int destroyfamicoms = 0;
 
+    public bool stopmove = false;
+
     // Use this for initialization
     void Start()
     {
@@ -37,8 +39,7 @@ public class playerctrl : MonoBehaviour
             GameObject newrock = Instantiate(firstaid.gameObject);
             //newrock.transform.SetParent(transform);
 
-            newrock.transform.position = Random.insideUnitCircle * 15;
-            newrock.transform.localScale *= Random.Range(0.7f, 2f);
+            newrock.transform.position = Random.insideUnitCircle * 10;
             newrock.transform.position = new Vector3(
                 newrock.transform.position.x,
                 newrock.transform.position.y,
@@ -56,7 +57,7 @@ public class playerctrl : MonoBehaviour
 
         if (destroyfamicoms >=2)
         {
-            SceneManager.LoadScene("end", LoadSceneMode.Single);
+            StartCoroutine(_changescene("end"));
         }
     }
 
@@ -64,54 +65,75 @@ public class playerctrl : MonoBehaviour
     void Update()
     {
 
-        //move mouse
-        Vector3 mouseP = Input.mousePosition;
-        mouseP.z = 2.0f;
-        mouse_curser.position = Camera.main.ScreenToWorldPoint(mouseP);
-
-        //gogogo
-        moveme();
-
-        //thing around me
-        if (getathing)
-        {
-            getathing.RotateAround(transform.position, Vector3.forward, attract * 0.04f * 200 * Time.deltaTime);
-        }
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            startattract = true;
-
-        }
-        if (Input.GetMouseButtonUp(0))
+        if (!stopmove)
         {
 
+            //move mouse
+            Vector3 mouseP = Input.mousePosition;
+            mouseP.z = 2.0f;
+            mouse_curser.position = Camera.main.ScreenToWorldPoint(mouseP);
+
+            //gogogo
+            moveme();
+
+            //thing around me
             if (getathing)
             {
+                getathing.RotateAround(transform.position, Vector3.forward, attract * 0.04f * 200 * Time.deltaTime);
+            }
 
-                var playerDir = transform.position - getathing.position;
-                playerDir.z = 0.0f;
-                playerDir = playerDir.normalized;
+            if (Input.GetMouseButtonDown(0))
+            {
+                startattract = true;
 
-                getathing.GetComponent<Rigidbody2D>().AddForce(-playerDir * attract * 0.015f, ForceMode2D.Impulse);
-                getathing.tag = "boom";
+                //se
+                if (!GameObject.Find("se").transform.GetChild(3).GetComponent<AudioSource>().isPlaying)
+                {
+                    GameObject.Find("se").transform.GetChild(3).GetComponent<AudioSource>().Play();
+                }
 
             }
-            startattract = false;
-            getathing = null;
+            if (Input.GetMouseButtonUp(0))
+            {
+
+                GameObject.Find("se").transform.GetChild(3).GetComponent<AudioSource>().Stop();
+
+                if (getathing)
+                {
+
+                    var playerDir = transform.position - getathing.position;
+                    playerDir.z = 0.0f;
+                    playerDir = playerDir.normalized;
+
+                    getathing.GetComponent<Rigidbody2D>().AddForce(-playerDir * attract * 0.015f, ForceMode2D.Impulse);
+                    getathing.tag = "boom";
+
+                    //se
+                    GameObject.Find("se").transform.GetChild(5).GetComponent<AudioSource>().Play();
+
+                }
+                startattract = false;
+                getathing = null;
+            }
+
+            if (startattract)
+            {
+                attract += 1;
+                if (attract >= attract_max)
+                    attract = attract_max;
+            }
+            else
+            {
+                attract -= 8;
+                if (attract <= 1)
+                    attract = 1;
+            }
+
         }
 
-        if (startattract)
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            attract += 1;
-            if (attract >= attract_max)
-                attract = attract_max;
-        }
-        else
-        {
-            attract -= 8;
-            if (attract <= 1)
-                attract = 1;
+            SceneManager.LoadScene("intro", LoadSceneMode.Single);
         }
 
     }
@@ -145,14 +167,23 @@ public class playerctrl : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+
+        //remove force
+        transform.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
+        transform.GetComponent<Rigidbody2D>().angularVelocity = 0;
+
         if (collision.transform.tag == "fami" || collision.transform.tag == "rock" || collision.transform.tag == "card")
         {
             getdamage();
             transform.GetComponent<flashme>().flashit();
+
         }
 
         if (collision.transform.tag == "aid")
         {
+
+            //se
+            GameObject.Find("se").transform.GetChild(2).GetComponent<AudioSource>().Play();
 
             Destroy(collision.gameObject);
 
@@ -200,8 +231,23 @@ public class playerctrl : MonoBehaviour
         }
         else if (myhealth <=0)
         {
-            SceneManager.LoadScene("intro", LoadSceneMode.Single);
+            stopmove = true;
+
+            StartCoroutine(_changescene("intro"));
+
+            //se
+            GameObject.Find("se").transform.GetChild(1).GetComponent<AudioSource>().Play();
+
         }
+
+    }
+
+    IEnumerator _changescene(string scene)
+    {
+
+        yield return new WaitForSeconds(2.5f);
+
+        SceneManager.LoadScene(scene, LoadSceneMode.Single);
 
     }
 
